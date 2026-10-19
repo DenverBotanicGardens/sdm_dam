@@ -1,0 +1,54 @@
+name: Refresh NetX Galleries
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *" # hourly; use "0 4 * * *" for daily like the projects page
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build site
+        env:
+          NETX_BASE_URL: ${{ secrets.NETX_BASE_URL }}
+          NETX_TOKEN: ${{ secrets.NETX_TOKEN }}
+          NETX_GALLERY_FIELD: Project      # attribute to group by; change when the new field is ready
+          NETX_FOLDER_ID: 45               # only assets in this folder and its subfolders
+          NETX_PAGE_TITLE: Projects        # heading shown on the index page
+          # Portal search URL; {value} is replaced with each project name
+          NETX_PORTAL_SEARCH_URL: https://your-portal/PASTE-SEARCH-URL-HERE-WITH-{value}
+        run: node scripts/fetch_galleries.js
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
