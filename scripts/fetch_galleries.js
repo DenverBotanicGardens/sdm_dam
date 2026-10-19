@@ -16,8 +16,10 @@ const NETX_TOKEN = process.env.NETX_TOKEN;
 const GALLERY_FIELD = process.env.NETX_GALLERY_FIELD || "Project";
 const PAGE_TITLE = process.env.NETX_PAGE_TITLE || GALLERY_FIELD;
 const FOLDER_ID = process.env.NETX_FOLDER_ID ? Number(process.env.NETX_FOLDER_ID) : null;
-// Portal search URL with {value} where the attribute value goes.
+// Portal search URL. Use {search} for a NetX portal advanced search (the script encodes
+// the search for each value), or {value} to insert the plain URL-encoded value.
 const SEARCH_URL = process.env.NETX_PORTAL_SEARCH_URL || "";
+const HAS_PLACEHOLDER = SEARCH_URL.includes("{search}") || SEARCH_URL.includes("{value}");
 const PAGE_SIZE = 500;
 const SITE_DIR = "site";
 
@@ -29,8 +31,32 @@ if (!FOLDER_ID) {
   console.error("NETX_FOLDER_ID must be set so only that folder's assets are counted.");
   process.exit(1);
 }
-if (!SEARCH_URL.includes("{value}")) {
-  console.warn("NETX_PORTAL_SEARCH_URL is missing or has no {value}; names will be listed without links.");
+if (!HAS_PLACEHOLDER) {
+  console.warn("NETX_PORTAL_SEARCH_URL is missing or has no {search} or {value}; names will be listed without links.");
+}
+
+// The portal stores an advanced search in the URL as base64-encoded JSON.
+// This matches the format of a portal "Project is <value>" search.
+function portalAdvancedSearch(value) {
+  const search = {
+    a: "file",
+    b: 0,
+    c: 0,
+    d: [3],
+    e: [4],
+    f: [0],
+    g: [value],
+    h: [GALLERY_FIELD],
+    i: [""]
+  };
+  return Buffer.from(JSON.stringify(search), "utf8").toString("base64");
+}
+
+function linkFor(value) {
+  if (!HAS_PLACEHOLDER) return null;
+  return SEARCH_URL
+    .split("{search}").join(portalAdvancedSearch(value))
+    .split("{value}").join(encodeURIComponent(value));
 }
 
 const rpcUrl = `${NETX_BASE_URL}/api/rpc`;
@@ -100,7 +126,7 @@ function galleryValues(asset) {
     .map(([title, count]) => ({
       title,
       count,
-      url: SEARCH_URL.includes("{value}") ? SEARCH_URL.split("{value}").join(encodeURIComponent(title)) : null
+      url: linkFor(title)
     }));
 
   await fs.mkdir(SITE_DIR, { recursive: true });
