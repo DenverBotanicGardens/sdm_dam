@@ -34,7 +34,7 @@ jobs:
           NETX_FOLDER_ID: 3510               # only assets in this folder and its subfolders
           NETX_PAGE_TITLE: Scott Dressel-Martin's Galleries        # heading shown on the index page
           # Portal advanced search; {search} is replaced with an encoded search for each gallery title
-          NETX_PORTAL_SEARCH_URL: https://botanicgardens.netx.net/portals/sdm/#search/advanced/{search}
+          NETX_PORTAL_SEARCH_URL: https://botanicgardens.netx.net/portals/dam-guide/#search/advanced/{search}
         run: node scripts/fetch_galleries.js
 
       - name: Upload artifact
