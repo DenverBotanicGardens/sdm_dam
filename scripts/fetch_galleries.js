@@ -13,7 +13,7 @@ const path = require("path");
 
 const NETX_BASE_URL = (process.env.NETX_BASE_URL || "").replace(/\/$/, "");
 const NETX_TOKEN = process.env.NETX_TOKEN;
-const GALLERY_FIELD = process.env.NETX_GALLERY_FIELD || "Project";
+const GALLERY_FIELD = process.env.NETX_GALLERY_FIELD || "Gallery Title";
 const PAGE_TITLE = process.env.NETX_PAGE_TITLE || GALLERY_FIELD;
 const FOLDER_ID = process.env.NETX_FOLDER_ID ? Number(process.env.NETX_FOLDER_ID) : null;
 // Portal search URL. Use {search} for a NetX portal advanced search (the script encodes
