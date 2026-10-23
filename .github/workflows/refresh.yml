@@ -3,7 +3,7 @@ name: Refresh NetX Galleries
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *" # hourly; use "0 4 * * *" for daily like the projects page
+    - cron: "0 9 * * *" # hourly; use "0 4 * * *" for daily like the projects page
 
 permissions:
   contents: read
